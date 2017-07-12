@@ -1,0 +1,25 @@
+{
+  "name": "retrofix",
+  "author": "Spoqa Inc.",
+  "description": "React bindings for Redux in Spoqa way",
+  "license": "MIT",
+  "version": "0.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "peerDependencies": {
+    "react": "^0.14.0 || ^15.0.0-0 || ^16.0.0-0",
+    "redux": "^2.0.0 || ^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.10",
+    "@types/react": "^15.0.36",
+    "@types/redux": "^3.6.0",
+    "typescript": "^2.4.1"
+  },
+  "dependencies": {
+    "hoist-non-react-statics": "^2.1.0"
+  }
+}
