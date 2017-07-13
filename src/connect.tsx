@@ -4,13 +4,15 @@ import * as hoistStatics from 'hoist-non-react-statics';
 import { Context } from './index';
 import { SideEffects } from './types';
 import { ContextItem, contextShape } from './Context';
+import { shallowEqual } from './util';
 
-export type GetState = Function;
+export type State = Object;
+export type GetSelectedState<TSelectedState> = () => TSelectedState;
 export type Dispatch = Function;
 
-export type Materials<TOwnProps> = {
+export type Materials<TOwnProps, TSelectedState> = {
     ownProps: TOwnProps,
-    getState: GetState,
+    getSelectedState: GetSelectedState<TSelectedState>,
     dispatch: Dispatch,
     sideEffects: SideEffects,
 };
@@ -22,39 +24,46 @@ export type ConnectContext = {
 let hotReloadingVersion = 0;
 const noop = () => {};
 
-export default function connect<TOwnProps, TContainerProps>(
-    mapMaterialsToProps: (materials: Materials<TOwnProps>) => TContainerProps,
+export default function connect<TOwnProps, TSelectedState, TContainerProps>(
+    stateSelector: (state: State) => TSelectedState,
+    mapMaterialsToProps: (materials: Materials<TOwnProps, TSelectedState>) => TContainerProps,
     contextKey?: string,
 ): Function {
     type ContainerType = ComponentType<TContainerProps>;
     const version = ++hotReloadingVersion;
     return (Container: ContainerType) => {
-        class Connect extends Component<TOwnProps, {}> {
+        class Connect extends Component<TOwnProps, TSelectedState> {
             retrofix: ContextItem;
+            getSelectedState: GetSelectedState<TSelectedState>;
             ref: ContainerType | null;
-            unsubscribe: Function;
             update: Function;
+            unsubscribe: Function;
             version: number;
             componentWillMount() {
                 this.retrofix = this.context.retrofix.get(contextKey);
                 this.ref = null;
                 this.version = version;
+                this.getSelectedState = () => this.state;
             }
             componentDidMount() {
-                this.update = () => this.setState({});
+                this.update = () => this.setState(stateSelector(this.retrofix.store.getState()));
                 this.unsubscribe = this.retrofix.store.subscribe(() => this.update());
             }
             componentWillUnmount() {
                 this.update = noop;
                 this.unsubscribe();
             }
+            shouldComponentUpdate(nextProps: TOwnProps, nextState: TSelectedState) {
+                if (shallowEqual(this.props, nextProps) &&
+                    shallowEqual(this.state, nextState)) return false;
+                return true;
+            }
             render() {
-                const { props: ownProps } = this;
-                const { store, sideEffects } = this.retrofix;
-                const { getState, dispatch } = store;
+                const { props: ownProps, getSelectedState } = this;
+                const { store: { dispatch }, sideEffects } = this.retrofix;
                 const props: any = mapMaterialsToProps({
                     ownProps,
-                    getState,
+                    getSelectedState,
                     dispatch,
                     sideEffects,
                 });
