@@ -21,16 +21,31 @@ export type ConnectContext = {
     retrofix: Context,
 };
 
+export type ConnectOptions<TOwnProps, TSelectedState> = {
+    context?: string,
+    ownPropsEqual: (props: TOwnProps, nextProps: TOwnProps) => boolean,
+    selectedStateEqual: (state: TSelectedState, nextState: TSelectedState) => boolean,
+};
+
 let hotReloadingVersion = 0;
 const noop = () => {};
 
 export default function connect<TOwnProps, TSelectedState, TContainerProps>(
     stateSelector: (state: State) => TSelectedState,
     mapMaterialsToProps: (materials: Materials<TOwnProps, TSelectedState>) => TContainerProps,
-    contextKey?: string,
+    options?: { [Key in keyof ConnectOptions<TOwnProps, TSelectedState>]?: ConnectOptions<TOwnProps, TSelectedState>[Key] },
 ): Function {
     type ContainerType = ComponentType<TContainerProps>;
     const version = ++hotReloadingVersion;
+    const {
+        context,
+        ownPropsEqual,
+        selectedStateEqual,
+    }: ConnectOptions<TOwnProps, TSelectedState> = {
+        ownPropsEqual: shallowEqual,
+        selectedStateEqual: shallowEqual,
+        ...options,
+    };
     return (Container: ContainerType) => {
         class Connect extends Component<TOwnProps, TSelectedState> {
             retrofix: ContextItem;
@@ -40,7 +55,7 @@ export default function connect<TOwnProps, TSelectedState, TContainerProps>(
             unsubscribe: Function;
             version: number;
             componentWillMount() {
-                this.retrofix = this.context.retrofix.get(contextKey);
+                this.retrofix = this.context.retrofix.get(context);
                 this.ref = null;
                 this.version = version;
                 this.getSelectedState = () => this.state;
@@ -54,8 +69,8 @@ export default function connect<TOwnProps, TSelectedState, TContainerProps>(
                 this.unsubscribe();
             }
             shouldComponentUpdate(nextProps: TOwnProps, nextState: TSelectedState) {
-                if (shallowEqual(this.props, nextProps) &&
-                    shallowEqual(this.state, nextState)) return false;
+                if (ownPropsEqual(this.props, nextProps) &&
+                    selectedStateEqual(this.state, nextState)) return false;
                 return true;
             }
             render() {
@@ -78,7 +93,7 @@ export default function connect<TOwnProps, TSelectedState, TContainerProps>(
                 if (this.version !== version) {
                     this.version = version;
                     this.unsubscribe();
-                    this.retrofix = this.context.retrofix.get(contextKey);
+                    this.retrofix = this.context.retrofix.get(context);
                     this.unsubscribe = this.retrofix.store.subscribe(() => this.update());
                 }
             };
