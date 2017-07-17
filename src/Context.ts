@@ -1,11 +1,14 @@
 import { Provider } from './index';
 import { Store, SideEffects } from './types';
 
-export type ContextItem = { store: Store, sideEffects: SideEffects };
+export interface ContextItem {
+    store: Store;
+    sideEffects: SideEffects;
+}
 
-export type ContextItems = {
-    [contextKey: string]: ContextItem,
-};
+export interface ContextItems {
+    [contextKey: string]: ContextItem;
+}
 
 export function contextShape(props: any, propName: string): null | Error {
     return props[propName] instanceof Context ? null : new Error();

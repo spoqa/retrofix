@@ -6,33 +6,37 @@ import { SideEffects } from './types';
 import { ContextItem, contextShape } from './Context';
 import { shallowEqual } from './util';
 
-export type State = Object;
+export interface Action {
+    type: any;
+}
+
+export type Dispatch<TAction extends Action> = (a: TAction) => TAction;
+
 export type GetSelectedState<TSelectedState> = () => TSelectedState;
-export type Dispatch = Function;
 
-export type Materials<TOwnProps, TSelectedState> = {
-    ownProps: TOwnProps,
-    getSelectedState: GetSelectedState<TSelectedState>,
-    dispatch: Dispatch,
-    sideEffects: SideEffects,
-};
+export interface Materials<TAction extends Action, TOwnProps, TSelectedState> {
+    ownProps: TOwnProps;
+    getSelectedState: GetSelectedState<TSelectedState>;
+    dispatch: Dispatch<TAction>;
+    sideEffects: SideEffects;
+}
 
-export type ConnectContext = {
-    retrofix: Context,
-};
+export interface ConnectContext {
+    retrofix: Context;
+}
 
-export type ConnectOptions<TOwnProps, TSelectedState> = {
-    context?: string,
-    ownPropsEqual: (props: TOwnProps, nextProps: TOwnProps) => boolean,
-    selectedStateEqual: (state: TSelectedState, nextState: TSelectedState) => boolean,
-};
+export interface ConnectOptions<TOwnProps, TSelectedState> {
+    context?: string;
+    ownPropsEqual: (props: TOwnProps, nextProps: TOwnProps) => boolean;
+    selectedStateEqual: (state: TSelectedState, nextState: TSelectedState) => boolean;
+}
 
 let hotReloadingVersion = 0;
 const noop = () => {};
 
-export default function connect<TOwnProps, TSelectedState, TContainerProps>(
-    stateSelector: (state: State) => TSelectedState,
-    mapMaterialsToProps: (materials: Materials<TOwnProps, TSelectedState>) => TContainerProps,
+export default function connect<TState, TAction extends Action, TOwnProps, TSelectedState, TContainerProps>(
+    stateSelector: (state: TState) => TSelectedState,
+    mapMaterialsToProps: (materials: Materials<TAction, TOwnProps, TSelectedState>) => TContainerProps,
     options?: { [Key in keyof ConnectOptions<TOwnProps, TSelectedState>]?: ConnectOptions<TOwnProps, TSelectedState>[Key] },
 ): Function {
     type ContainerType = ComponentType<TContainerProps>;
@@ -79,7 +83,7 @@ export default function connect<TOwnProps, TSelectedState, TContainerProps>(
                 const props: any = mapMaterialsToProps({
                     ownProps,
                     getSelectedState,
-                    dispatch,
+                    dispatch: dispatch as Dispatch<TAction>,
                     sideEffects,
                 });
                 props.ref = (ref: ContainerType) => this.ref = ref;
