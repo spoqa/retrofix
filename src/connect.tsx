@@ -1,4 +1,5 @@
-import React, { Component, ComponentType } from 'react';
+import * as React from 'react';
+import { Component, ComponentType } from 'react';
 import * as hoistStatics from 'hoist-non-react-statics';
 
 import { Context } from './index';
@@ -62,6 +63,7 @@ export default function connect<TState, TAction extends Action, TOwnProps, TSele
                 this.retrofix = this.context.retrofix.get(context);
                 this.ref = null;
                 this.version = version;
+                this.setState(stateSelector(this.retrofix.store.getState()));
                 this.getSelectedState = () => this.state;
             }
             componentDidMount() {

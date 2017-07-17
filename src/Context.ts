@@ -11,7 +11,9 @@ export interface ContextItems {
 }
 
 export function contextShape(props: any, propName: string): null | Error {
-    return props[propName] instanceof Context ? null : new Error();
+    return props[propName] ?
+        (props[propName] instanceof Context ? null : new Error()) :
+        null;
 }
 
 export default class Context {
