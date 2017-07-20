@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Component, ComponentType } from 'react';
 import * as hoistStatics from 'hoist-non-react-statics';
 
-import { Context } from './index';
 import { SideEffects } from './types';
 import { ContextItem, contextShape } from './Context';
 import { shallowEqual } from './util';
@@ -22,10 +21,6 @@ export interface Materials<TAction extends Action, TOwnProps, TSelectedState> {
     sideEffects: SideEffects;
 }
 
-export interface ConnectContext {
-    retrofix: Context;
-}
-
 export interface ConnectOptions<TOwnProps, TSelectedState> {
     context?: string;
     ownPropsEqual: (props: TOwnProps, nextProps: TOwnProps) => boolean;
@@ -38,8 +33,8 @@ const noop = () => {};
 export default function connect<TState, TAction extends Action, TOwnProps, TSelectedState, TContainerProps>(
     stateSelector: (state: TState) => TSelectedState,
     mapMaterialsToProps: (materials: Materials<TAction, TOwnProps, TSelectedState>) => TContainerProps,
-    options?: { [Key in keyof ConnectOptions<TOwnProps, TSelectedState>]?: ConnectOptions<TOwnProps, TSelectedState>[Key] },
-): Function {
+    options?: Partial<ConnectOptions<TOwnProps, TSelectedState>>,
+): (Container: ComponentType<TContainerProps>) => ComponentType<TOwnProps> {
     type ContainerType = ComponentType<TContainerProps>;
     const version = ++hotReloadingVersion;
     const {
