@@ -34,7 +34,7 @@ export default function connect<TState, TAction extends Action, TOwnProps, TSele
     stateSelector: (state: TState) => TSelectedState,
     mapMaterialsToProps: (materials: Materials<TAction, TOwnProps, TSelectedState>) => TContainerProps,
     options?: Partial<ConnectOptions<TOwnProps, TSelectedState>>,
-): (Container: ComponentType<TContainerProps>) => ComponentType<TOwnProps> {
+): (Container: ComponentType<any>) => ComponentType<TOwnProps> {
     type ContainerType = ComponentType<TContainerProps>;
     const version = ++hotReloadingVersion;
     const {
