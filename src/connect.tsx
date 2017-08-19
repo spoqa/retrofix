@@ -55,7 +55,7 @@ export default function connect<TState, TAction extends Action, TOwnProps, TSele
             unsubscribe: Function;
             version: number;
             componentWillMount() {
-                this.retrofix = this.context.retrofix.get(context);
+                this.retrofix = this.context.retrofixContext.get(context);
                 this.ref = null;
                 this.version = version;
                 this.setState(stateSelector(this.retrofix.store.getState()));
@@ -86,7 +86,7 @@ export default function connect<TState, TAction extends Action, TOwnProps, TSele
                 props.ref = (ref: ContainerType) => this.ref = ref;
                 return <Container { ...props }/>;
             }
-            static contextTypes = { retrofix: contextShape };
+            static contextTypes = { retrofixContext: contextShape };
         }
         if (process.env.NODE_ENV !== 'production') {
             // hot reloading
@@ -94,7 +94,7 @@ export default function connect<TState, TAction extends Action, TOwnProps, TSele
                 if (this.version !== version) {
                     this.version = version;
                     this.unsubscribe();
-                    this.retrofix = this.context.retrofix.get(context);
+                    this.retrofix = this.context.retrofixContext.get(context);
                     this.unsubscribe = this.retrofix.store.subscribe(() => this.update());
                 }
             };

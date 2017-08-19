@@ -1,4 +1,3 @@
-import { Provider } from './index';
 import { Store, SideEffects } from './types';
 
 export interface ContextItem {
@@ -17,32 +16,33 @@ export function contextShape(props: any, propName: string): null | Error {
 }
 
 export default class Context {
-    private rootContextItem: ContextItem;
     constructor(
-        public rootProvider: Provider,
-        private items: ContextItems = {},
-    ) {
-        const { store, sideEffects } = this.rootProvider.props;
-        this.rootContextItem = { store, sideEffects };
+        private contextKeyList: string[],
+        private contextItemList: ContextItem[],
+    ) { }
+    get(contextKey: string = ''): ContextItem {
+        const contextItemIndex = this.contextKeyList.indexOf(contextKey);
+        if (contextItemIndex === -1) throw new Error();
+        return this.contextItemList[contextItemIndex];
     }
-    get(contextKey?: string): ContextItem {
-        const contextItem = contextKey ?
-            this.items[contextKey] :
-            this.rootContextItem;
-        if (!contextItem) throw new Error();
-        return contextItem;
+    has(contextKey: string = ''): boolean {
+        const contextItemIndex = this.contextKeyList.indexOf(contextKey);
+        return contextItemIndex !== -1;
     }
-    has(provider: Provider): boolean {
-        const { context } = provider.props;
-        return !!(context && this.items[context]);
+    static createRootContext(rootContextItem: ContextItem): Context {
+        return new Context(
+            [''],
+            [rootContextItem]
+        );
     }
-    mount(provider: Provider): void {
-        const { store, sideEffects, context } = provider.props;
-        if (!context) return;
-        this.items[context] = { store, sideEffects };
-    }
-    unmount(provider: Provider): void {
-        const { context } = provider.props;
-        context && delete this.items[context];
+    static createLocalContext(
+        parentContext: Context,
+        contextKey: string,
+        contextItem: ContextItem,
+    ): Context {
+        return new Context(
+            parentContext.contextKeyList.concat(contextKey),
+            parentContext.contextItemList.concat(contextItem),
+        );
     }
 }

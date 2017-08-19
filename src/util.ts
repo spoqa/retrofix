@@ -1,11 +1,3 @@
-export function assert(condition: boolean | (() => boolean), message?: string) {
-    if (process.env.NODE_ENV !== 'production') {
-        if (typeof condition === 'function' ? condition() : condition) {
-            throw new Error(message);
-        }
-    }
-}
-
 export function shallowEqual(objA: any, objB: any): boolean {
     if (Object.is(objA, objB)) return true;
     if (typeof objA !== 'object' || objA === null ||
