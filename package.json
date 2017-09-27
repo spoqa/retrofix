@@ -3,7 +3,7 @@
   "author": "Spoqa Inc.",
   "description": "React bindings for Redux in Spoqa way",
   "license": "MIT",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
