@@ -6,7 +6,7 @@
     "outDir": "./dist",
     "allowJs": false,
     "declaration": true,
-    "inlineSourceMap": true,
+    "inlineSourceMap": false,
     "removeComments": false,
     "noEmit": false,
     "isolatedModules": false,
