@@ -54,15 +54,20 @@ export default function connect<TState, TAction extends Action, TOwnProps, TSele
             update: Function;
             unsubscribe: Function;
             version: number;
+            _state: TSelectedState;
             componentWillMount() {
                 this.retrofix = this.context.retrofixContext.get(context);
                 this.ref = null;
                 this.version = version;
-                this.setState(stateSelector(this.retrofix.store.getState()));
-                this.getSelectedState = () => this.state;
+                this._state = stateSelector(this.retrofix.store.getState());
+                this.setState(this._state);
+                this.getSelectedState = () => this._state;
             }
             componentDidMount() {
-                this.update = () => this.setState(stateSelector(this.retrofix.store.getState()));
+                this.update = () => {
+                    this._state = stateSelector(this.retrofix.store.getState());
+                    this.setState(this._state);
+                };
                 this.unsubscribe = this.retrofix.store.subscribe(() => this.update());
             }
             componentWillUnmount() {
