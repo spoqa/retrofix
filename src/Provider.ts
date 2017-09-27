@@ -9,7 +9,7 @@ import { contextShape } from './Context';
 
 export type ProviderProps = {
     store: Store,
-    sideEffects: SideEffects,
+    sideEffects?: SideEffects,
     context?: string,
     onUnmount?(): void,
 };
@@ -27,7 +27,7 @@ export default class Provider extends Component<ProviderProps, ProviderContext> 
         const { contextKey } = this;
         const contextItem = {
             store: this.props.store,
-            sideEffects: this.props.sideEffects,
+            sideEffects: this.props.sideEffects || {},
         };
         if (this.isRoot) {
             if (process.env.NODE_ENV !== 'production') {
